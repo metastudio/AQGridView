@@ -160,10 +160,14 @@
 	NSUInteger numRows = _numberOfItems / numPerRow;
 	if ( _numberOfItems % numPerRow != 0 )
 		numRows++;
+    
+	CGFloat height = ( ((CGFloat)ceilf((CGFloat)numRows * _actualCellSize.height)) + _topPadding + _bottomPadding);
 	
-	CGFloat height = ( ((CGFloat)ceilf((CGFloat)numRows * _actualCellSize.height)) + _topPadding + _bottomPadding );
-	if (height < _gridView.bounds.size.height && _gridView.contentSizeGrowsToFillBounds)
+    //FIXED HERE
+    //added checking for contentSizeFillsBounds
+    if (height < _gridView.bounds.size.height && _gridView.contentSizeGrowsToFillBounds) {
 		height = _gridView.bounds.size.height;
+    }
 	
 	return ( CGSizeMake(((CGFloat)ceilf(_actualCellSize.width * numPerRow)) + _leftPadding + _rightPadding, height) );
 }
@@ -210,7 +214,9 @@
 	{
 		CGRect cellRect = [self cellRectAtIndex: i];
 		
-		if ( CGRectGetMaxY(cellRect) < CGRectGetMinY(aRect) )
+        // numPerRow must be > 0 or you get an infinite loop
+        // (i becomes 0 - 1 => UINT_MAX; loop UINT_MAX+1 => 0, etc.)
+		if ( CGRectGetMaxY(cellRect) < CGRectGetMinY(aRect) && numPerRow > 0 )
 		{
 			// jump forward to the next row
 			i += (numPerRow - 1);
